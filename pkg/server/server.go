@@ -2,7 +2,9 @@ package server
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/barbibrussa/bookmanager/pkg/models"
+	"github.com/go-chi/chi"
 	"gorm.io/gorm"
 	"io/ioutil"
 	"net/http"
@@ -68,6 +70,31 @@ func (s *Server) CreateBook(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.WriteHeader(http.StatusCreated)
+}
+
+func (s *Server) DeleteBook(w http.ResponseWriter, r *http.Request) {
+	id := chi.URLParam(r, "id")
+
+	var book models.Book
+
+	err := s.db.Model(&models.Book{}).Where("id = ?", id).First(&book).Error
+	if err != nil {
+		http.Error(w, "Failed to get book from database", http.StatusNotFound)
+		return
+	}
+
+	err = s.db.Delete(&models.Book{}, id).Error
+	if err != nil {
+		http.Error(w, "Failed to delete book", http.StatusInternalServerError)
+		return
+	}
+
+	_, err = w.Write([]byte(fmt.Sprintf("Book id %s has been deleted", id)))
+	if err != nil {
+		http.Error(w, "Failed to write response", http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
 }
 
 func NewServer(db *gorm.DB) *Server {

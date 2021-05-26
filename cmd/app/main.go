@@ -26,6 +26,7 @@ func main() {
 
 	r.Get("/books", s.ListBooks)
 	r.Post("/books", s.CreateBook)
+	r.Delete("/books/{id}", s.DeleteBook)
 
 	err = http.ListenAndServe(":3030", r)
 	if err != nil {
