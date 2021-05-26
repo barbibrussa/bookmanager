@@ -8,6 +8,8 @@ import (
 	"gorm.io/gorm"
 	"io/ioutil"
 	"net/http"
+	"strconv"
+	"time"
 )
 
 type Server struct {
@@ -120,6 +122,74 @@ func (s *Server) GetBook(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.WriteHeader(http.StatusOK)
+}
+
+func (s *Server) BorrowBook(w http.ResponseWriter, r *http.Request) {
+	id := chi.URLParam(r, "id")
+
+	var book models.Book
+
+	err := s.db.Model(&models.Book{}).Where("id = ?", id).First(&book).Error
+	if err != nil {
+		http.Error(w, "Failed to get book from database", http.StatusNotFound)
+		return
+	}
+
+	var count int64
+
+	err = s.db.Model(&models.Checkout{}).Where("book_id = ?", id).Where("returned_at IS NULL").Count(&count).Error
+	if err != nil {
+		http.Error(w, "Error while getting book", http.StatusInternalServerError)
+		return
+	}
+
+	if count != 0 {
+		http.Error(w, "Book not available", http.StatusNotFound)
+		return
+	}
+
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		http.Error(w, "Failed to read request body", http.StatusBadRequest)
+		return
+	}
+
+	var checkout models.Checkout
+
+	err = json.Unmarshal(body, &checkout)
+	if err != nil {
+		http.Error(w, "Failed to unmarshall request", http.StatusInternalServerError)
+		return
+	}
+
+	i, err := strconv.Atoi(id)
+	if err != nil {
+		http.Error(w, "Failed to process request", http.StatusInternalServerError)
+		return
+	}
+
+	checkout.BookID = i
+	checkout.BorrowedAt = time.Now()
+	checkout.Deadline = time.Now().Add(730 * time.Hour)
+
+	err = s.db.Model(&models.Checkout{}).Save(&checkout).Error
+	if err != nil {
+		http.Error(w, "Failed to create checkout to database", http.StatusInternalServerError)
+		return
+	}
+
+	payload, err := json.Marshal(checkout)
+	if err != nil {
+		http.Error(w, "Failed to marshall response", http.StatusInternalServerError)
+		return
+	}
+
+	_, err = w.Write(payload)
+	if err != nil {
+		http.Error(w, "Failed to write response", http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusCreated)
 }
 
 func NewServer(db *gorm.DB) *Server {
