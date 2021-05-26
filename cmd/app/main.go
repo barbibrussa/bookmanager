@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/barbibrussa/bookmanager/pkg/models"
+	"github.com/barbibrussa/bookmanager/pkg/server"
 	"github.com/go-chi/chi"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
@@ -21,6 +22,7 @@ func main() {
 	}
 
 	r := chi.NewRouter()
+	s := server.NewServer(db)
 
 	err = http.ListenAndServe(":3030", r)
 	if err != nil {
