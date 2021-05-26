@@ -97,6 +97,31 @@ func (s *Server) DeleteBook(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
+func (s *Server) GetBook(w http.ResponseWriter, r *http.Request) {
+	id := chi.URLParam(r, "id")
+
+	var book models.Book
+
+	err := s.db.Model(&models.Book{}).Where("id = ?", id).First(&book).Error
+	if err != nil {
+		http.Error(w, "Failed to get book from database", http.StatusNotFound)
+		return
+	}
+
+	body, err := json.Marshal(book)
+	if err != nil {
+		http.Error(w, "Failed to marshall response", http.StatusInternalServerError)
+		return
+	}
+
+	_, err = w.Write(body)
+	if err != nil {
+		http.Error(w, "Failed to write response", http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+}
+
 func NewServer(db *gorm.DB) *Server {
 	return &Server{db: db}
 }
