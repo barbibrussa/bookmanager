@@ -24,6 +24,8 @@ func main() {
 	r := chi.NewRouter()
 	s := server.NewServer(db)
 
+	r.Get("/books", s.ListBooks)
+
 	err = http.ListenAndServe(":3030", r)
 	if err != nil {
 		log.Fatal("Error serving HTPP on port :3030 ", err)
