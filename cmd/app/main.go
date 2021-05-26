@@ -25,6 +25,7 @@ func main() {
 	s := server.NewServer(db)
 
 	r.Get("/books", s.ListBooks)
+	r.Post("/books", s.CreateBook)
 
 	err = http.ListenAndServe(":3030", r)
 	if err != nil {
