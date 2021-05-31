@@ -197,15 +197,26 @@ func (s *Server) ReturnBook(w http.ResponseWriter, r *http.Request) {
 
 	now := time.Now()
 
-	q := s.db.Model(&models.Checkout{}).Where("book_id = ? AND returned_at IS NULL", id).Updates(map[string]interface{}{
-		"returned_at": &now,
-	})
+	var count int64
+
+	err := s.db.Model(&models.Checkout{}).Where("book_id = ?", id).Where("returned_at IS NULL").Count(&count).Error
+	if err != nil {
+		http.Error(w, "Error while getting book", http.StatusInternalServerError)
+		return
+	}
+
+	if count != 1 {
+		http.Error(w, "This book has not been borrowed", http.StatusNotFound)
+		return
+	}
+
+	q := s.db.Model(&models.Checkout{}).Where("book_id = ? AND returned_at IS NULL", id).UpdateColumn("returned_at", &now)
 	if q.Error != nil && q.RowsAffected != 1 {
 		http.Error(w, "Failed to return book", http.StatusNotFound)
 		return
 	}
 
-	_, err := w.Write([]byte(fmt.Sprintf("The book %s has been returned", id)))
+	_, err = w.Write([]byte(fmt.Sprintf("The book %s has been returned", id)))
 	if err != nil {
 		http.Error(w, "Failed to write response", http.StatusInternalServerError)
 		return
