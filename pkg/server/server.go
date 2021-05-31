@@ -197,20 +197,54 @@ func (s *Server) ReturnBook(w http.ResponseWriter, r *http.Request) {
 
 	now := time.Now()
 
-	q := s.db.Model(&models.Checkout{}).Where("book_id = ? AND returned_at IS NULL", id).Updates(map[string]interface{}{
-		"returned_at": &now,
-	})
+	var count int64
+
+	err := s.db.Model(&models.Checkout{}).Where("book_id = ?", id).Where("returned_at IS NULL").Count(&count).Error
+	if err != nil {
+		http.Error(w, "Error while getting book", http.StatusInternalServerError)
+		return
+	}
+
+	if count != 1 {
+		http.Error(w, "This book has not been borrowed", http.StatusNotFound)
+		return
+	}
+
+	q := s.db.Model(&models.Checkout{}).Where("book_id = ? AND returned_at IS NULL", id).UpdateColumn("returned_at", &now)
 	if q.Error != nil && q.RowsAffected != 1 {
 		http.Error(w, "Failed to return book", http.StatusNotFound)
 		return
 	}
 
-	_, err := w.Write([]byte(fmt.Sprintf("The book %s has been returned", id)))
+	_, err = w.Write([]byte(fmt.Sprintf("The book %s has been returned", id)))
 	if err != nil {
 		http.Error(w, "Failed to write response", http.StatusInternalServerError)
 		return
 	}
 	w.WriteHeader(http.StatusCreated)
+}
+
+func (s *Server) ListCheckouts(w http.ResponseWriter, r *http.Request) {
+	var list []models.Checkout
+
+	err := s.db.Model(&models.Checkout{}).Where("returned_at IS NULL").Find(&list).Error
+	if err != nil {
+		http.Error(w, "Failed to list checkouts from database", http.StatusInternalServerError)
+		return
+	}
+
+	body, err := json.Marshal(list)
+	if err != nil {
+		http.Error(w, "Failed to marshall response", http.StatusInternalServerError)
+		return
+	}
+
+	_, err = w.Write(body)
+	if err != nil {
+		http.Error(w, "Failed to write response", http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
 }
 
 func NewServer(db *gorm.DB) *Server {
