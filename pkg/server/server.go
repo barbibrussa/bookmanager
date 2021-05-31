@@ -224,6 +224,29 @@ func (s *Server) ReturnBook(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 }
 
+func (s *Server) ListCheckouts(w http.ResponseWriter, r *http.Request) {
+	var list []models.Checkout
+
+	err := s.db.Model(&models.Checkout{}).Where("returned_at IS NULL").Find(&list).Error
+	if err != nil {
+		http.Error(w, "Failed to list checkouts from database", http.StatusInternalServerError)
+		return
+	}
+
+	body, err := json.Marshal(list)
+	if err != nil {
+		http.Error(w, "Failed to marshall response", http.StatusInternalServerError)
+		return
+	}
+
+	_, err = w.Write(body)
+	if err != nil {
+		http.Error(w, "Failed to write response", http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+}
+
 func NewServer(db *gorm.DB) *Server {
 	return &Server{db: db}
 }

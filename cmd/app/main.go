@@ -30,6 +30,7 @@ func main() {
 	r.Get("/books/{id}", s.GetBook)
 	r.Post("/books/{id}/borrow", s.BorrowBook)
 	r.Put("/books/{id}/return", s.ReturnBook)
+	r.Get("/checkouts", s.ListCheckouts)
 
 	err = http.ListenAndServe(":3030", r)
 	if err != nil {
