@@ -247,6 +247,10 @@ func (s *Server) ListCheckouts(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
+func (s *Server) ListBooksAvailable(w http.ResponseWriter, r *http.Request) {
+
+}
+
 func NewServer(db *gorm.DB) *Server {
 	return &Server{db: db}
 }
