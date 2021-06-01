@@ -247,6 +247,31 @@ func (s *Server) ListCheckouts(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
+func (s *Server) ListBooksAvailable(w http.ResponseWriter, r *http.Request) {
+	var list []models.Book
+
+	err := s.db.Model(&models.Book{}).
+		Joins("LEFT JOIN checkouts ON books.id = checkouts.book_id AND checkouts.returned_at IS NULL").
+		Where("checkouts.id IS NULL AND books.deleted_at IS NULL").Find(&list).Error
+	if err != nil {
+		http.Error(w, "Failed to list checkouts from database", http.StatusInternalServerError)
+		return
+	}
+
+	body, err := json.Marshal(list)
+	if err != nil {
+		http.Error(w, "Failed to marshall response", http.StatusInternalServerError)
+		return
+	}
+
+	_, err = w.Write(body)
+	if err != nil {
+		http.Error(w, "Failed to write response", http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+}
+
 func NewServer(db *gorm.DB) *Server {
 	return &Server{db: db}
 }
