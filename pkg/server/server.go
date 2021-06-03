@@ -46,9 +46,7 @@ func (s *Server) CreateBook(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var book models.Book
-
-	err = json.Unmarshal(body, &book)
+	book, err := models.NewBookFromJSON(body)
 	if err != nil {
 		http.Error(w, "Failed to unmarshall request", http.StatusInternalServerError)
 		return
