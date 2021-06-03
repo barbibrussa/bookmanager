@@ -16,6 +16,19 @@ type Server struct {
 	db *gorm.DB
 }
 
+func (s *Server) writeResponse(w http.ResponseWriter, status int, body []byte) {
+	_, err := w.Write(body)
+	if err != nil {
+		http.Error(w, "Failed to write response", http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(status)
+}
+
+func (s *Server) readBody(r *http.Request) ([]byte, error) {
+	return ioutil.ReadAll(r.Body)
+}
+
 func (s *Server) ListBooks(w http.ResponseWriter, r *http.Request) {
 	var list []models.Book
 
@@ -31,24 +44,17 @@ func (s *Server) ListBooks(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err = w.Write(body)
-	if err != nil {
-		http.Error(w, "Failed to write response", http.StatusInternalServerError)
-		return
-	}
-	w.WriteHeader(http.StatusOK)
+	s.writeResponse(w, http.StatusOK, body)
 }
 
 func (s *Server) CreateBook(w http.ResponseWriter, r *http.Request) {
-	body, err := ioutil.ReadAll(r.Body)
+	body, err := s.readBody(r)
 	if err != nil {
 		http.Error(w, "Failed to read request body", http.StatusBadRequest)
 		return
 	}
 
-	var book models.Book
-
-	err = json.Unmarshal(body, &book)
+	book, err := models.NewBookFromJSON(body)
 	if err != nil {
 		http.Error(w, "Failed to unmarshall request", http.StatusInternalServerError)
 		return
@@ -60,18 +66,13 @@ func (s *Server) CreateBook(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	payload, err := json.Marshal(book)
+	payload, err := book.ToJSON()
 	if err != nil {
 		http.Error(w, "Failed to marshall response", http.StatusInternalServerError)
 		return
 	}
 
-	_, err = w.Write(payload)
-	if err != nil {
-		http.Error(w, "Failed to write response", http.StatusInternalServerError)
-		return
-	}
-	w.WriteHeader(http.StatusCreated)
+	s.writeResponse(w, http.StatusCreated, payload)
 }
 
 func (s *Server) DeleteBook(w http.ResponseWriter, r *http.Request) {
@@ -91,12 +92,7 @@ func (s *Server) DeleteBook(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err = w.Write([]byte(fmt.Sprintf("Book id %s has been deleted", id)))
-	if err != nil {
-		http.Error(w, "Failed to write response", http.StatusInternalServerError)
-		return
-	}
-	w.WriteHeader(http.StatusOK)
+	s.writeResponse(w, http.StatusOK, []byte(fmt.Sprintf("Book id %s has been deleted", id)))
 }
 
 func (s *Server) GetBook(w http.ResponseWriter, r *http.Request) {
@@ -110,18 +106,13 @@ func (s *Server) GetBook(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	body, err := json.Marshal(book)
+	body, err := book.ToJSON()
 	if err != nil {
 		http.Error(w, "Failed to marshall response", http.StatusInternalServerError)
 		return
 	}
 
-	_, err = w.Write(body)
-	if err != nil {
-		http.Error(w, "Failed to write response", http.StatusInternalServerError)
-		return
-	}
-	w.WriteHeader(http.StatusOK)
+	s.writeResponse(w, http.StatusOK, body)
 }
 
 func (s *Server) BorrowBook(w http.ResponseWriter, r *http.Request) {
@@ -148,15 +139,13 @@ func (s *Server) BorrowBook(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	body, err := ioutil.ReadAll(r.Body)
+	body, err := s.readBody(r)
 	if err != nil {
 		http.Error(w, "Failed to read request body", http.StatusBadRequest)
 		return
 	}
 
-	var checkout models.Checkout
-
-	err = json.Unmarshal(body, &checkout)
+	checkout, err := models.NewCheckoutFromJSON(body)
 	if err != nil {
 		http.Error(w, "Failed to unmarshall request", http.StatusInternalServerError)
 		return
@@ -178,18 +167,13 @@ func (s *Server) BorrowBook(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	payload, err := json.Marshal(checkout)
+	payload, err := checkout.ToJSON()
 	if err != nil {
 		http.Error(w, "Failed to marshall response", http.StatusInternalServerError)
 		return
 	}
 
-	_, err = w.Write(payload)
-	if err != nil {
-		http.Error(w, "Failed to write response", http.StatusInternalServerError)
-		return
-	}
-	w.WriteHeader(http.StatusCreated)
+	s.writeResponse(w, http.StatusCreated, payload)
 }
 
 func (s *Server) ReturnBook(w http.ResponseWriter, r *http.Request) {
@@ -216,12 +200,7 @@ func (s *Server) ReturnBook(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err = w.Write([]byte(fmt.Sprintf("The book %s has been returned", id)))
-	if err != nil {
-		http.Error(w, "Failed to write response", http.StatusInternalServerError)
-		return
-	}
-	w.WriteHeader(http.StatusCreated)
+	s.writeResponse(w, http.StatusOK, []byte(fmt.Sprintf("The book %s has been returned", id)))
 }
 
 func (s *Server) ListCheckouts(w http.ResponseWriter, r *http.Request) {
@@ -239,12 +218,7 @@ func (s *Server) ListCheckouts(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err = w.Write(body)
-	if err != nil {
-		http.Error(w, "Failed to write response", http.StatusInternalServerError)
-		return
-	}
-	w.WriteHeader(http.StatusOK)
+	s.writeResponse(w, http.StatusOK, body)
 }
 
 func (s *Server) ListBooksAvailable(w http.ResponseWriter, r *http.Request) {
@@ -264,12 +238,7 @@ func (s *Server) ListBooksAvailable(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err = w.Write(body)
-	if err != nil {
-		http.Error(w, "Failed to write response", http.StatusInternalServerError)
-		return
-	}
-	w.WriteHeader(http.StatusOK)
+	s.writeResponse(w, http.StatusOK, body)
 }
 
 func NewServer(db *gorm.DB) *Server {
