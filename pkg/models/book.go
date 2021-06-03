@@ -14,3 +14,12 @@ type Book struct {
 func (b Book) ToJSON() ([]byte, error) {
 	return json.Marshal(b)
 }
+
+func NewBookFromJSON(b []byte) (Book, error) {
+	var book Book
+	err := json.Unmarshal(b, &book)
+	if err != nil {
+		return Book{}, err
+	}
+	return book, nil
+}
