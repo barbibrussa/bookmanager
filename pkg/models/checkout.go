@@ -23,3 +23,12 @@ type Checkout struct {
 func (c Checkout) ToJSON() ([]byte, error) {
 	return json.Marshal(c)
 }
+
+func NewCheckoutFromJSON(b []byte) (Checkout, error) {
+	var checkout Checkout
+	err := json.Unmarshal(b, &checkout)
+	if err != nil {
+		return Checkout{}, err
+	}
+	return checkout, nil
+}
