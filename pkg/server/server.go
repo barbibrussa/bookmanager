@@ -60,7 +60,7 @@ func (s *Server) CreateBook(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	payload, err := json.Marshal(book)
+	payload, err := book.ToJSON()
 	if err != nil {
 		http.Error(w, "Failed to marshall response", http.StatusInternalServerError)
 		return
@@ -110,7 +110,7 @@ func (s *Server) GetBook(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	body, err := json.Marshal(book)
+	body, err := book.ToJSON()
 	if err != nil {
 		http.Error(w, "Failed to marshall response", http.StatusInternalServerError)
 		return
@@ -178,7 +178,7 @@ func (s *Server) BorrowBook(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	payload, err := json.Marshal(checkout)
+	payload, err := checkout.ToJSON()
 	if err != nil {
 		http.Error(w, "Failed to marshall response", http.StatusInternalServerError)
 		return
