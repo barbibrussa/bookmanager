@@ -152,9 +152,7 @@ func (s *Server) BorrowBook(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var checkout models.Checkout
-
-	err = json.Unmarshal(body, &checkout)
+	checkout, err := models.NewCheckoutFromJSON(body)
 	if err != nil {
 		http.Error(w, "Failed to unmarshall request", http.StatusInternalServerError)
 		return
