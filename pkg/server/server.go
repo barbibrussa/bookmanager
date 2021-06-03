@@ -25,6 +25,10 @@ func (s *Server) writeResponse(w http.ResponseWriter, status int, body []byte) {
 	w.WriteHeader(status)
 }
 
+func (s *Server) readBody(r *http.Request) ([]byte, error) {
+	return ioutil.ReadAll(r.Body)
+}
+
 func (s *Server) ListBooks(w http.ResponseWriter, r *http.Request) {
 	var list []models.Book
 
@@ -44,7 +48,7 @@ func (s *Server) ListBooks(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) CreateBook(w http.ResponseWriter, r *http.Request) {
-	body, err := ioutil.ReadAll(r.Body)
+	body, err := s.readBody(r)
 	if err != nil {
 		http.Error(w, "Failed to read request body", http.StatusBadRequest)
 		return
@@ -135,7 +139,7 @@ func (s *Server) BorrowBook(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	body, err := ioutil.ReadAll(r.Body)
+	body, err := s.readBody(r)
 	if err != nil {
 		http.Error(w, "Failed to read request body", http.StatusBadRequest)
 		return
