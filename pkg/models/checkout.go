@@ -1,6 +1,7 @@
 package models
 
 import (
+	"encoding/json"
 	"gorm.io/gorm"
 	"time"
 )
@@ -17,4 +18,8 @@ type Checkout struct {
 
 	Book   Book `json:"-"`
 	BookID int  `json:"book_id"`
+}
+
+func (c Checkout) ToJSON() ([]byte, error) {
+	return json.Marshal(c)
 }
