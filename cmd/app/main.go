@@ -16,7 +16,7 @@ func main() {
 		log.Fatal("Error while connecting to the database: ", err)
 	}
 
-	err = db.AutoMigrate(&models.Book{}, &models.Checkout{})
+	err = db.AutoMigrate(&models.Book{}, &models.Checkout{}, &models.Review{})
 	if err != nil {
 		log.Fatal("Error while auto-migrating models: ", err)
 	}
@@ -32,6 +32,7 @@ func main() {
 	r.Put("/books/{id}/return", s.ReturnBook)
 	r.Get("/checkouts", s.ListCheckouts)
 	r.Get("/books/available", s.ListBooksAvailable)
+	r.Post("/books/{id}/review", s.CreateReview)
 
 	err = http.ListenAndServe(":3030", r)
 	if err != nil {
