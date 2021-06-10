@@ -290,6 +290,39 @@ func (s *Server) CreateReview(w http.ResponseWriter, r *http.Request) {
 	s.writeResponse(w, http.StatusCreated, payload)
 }
 
+func (s *Server) ListBookReviews(w http.ResponseWriter, r *http.Request) {
+	id := chi.URLParam(r, "id")
+
+	var list []models.Review
+
+	var count int64
+
+	err := s.db.Model(&models.Book{}).Where("id = ?", id).Count(&count).Error
+	if err != nil {
+		http.Error(w, "Error while getting book", http.StatusInternalServerError)
+		return
+	}
+
+	if count == 0 {
+		http.Error(w, "Book not available", http.StatusNotFound)
+		return
+	}
+
+	err = s.db.Model(&models.Review{}).Where("book_id = ?", id).Find(&list).Error
+	if err != nil {
+		http.Error(w, "Failed to list checkouts from database", http.StatusInternalServerError)
+		return
+	}
+
+	body, err := json.Marshal(list)
+	if err != nil {
+		http.Error(w, "Failed to marshall response", http.StatusInternalServerError)
+		return
+	}
+
+	s.writeResponse(w, http.StatusOK, body)
+}
+
 func NewServer(db *gorm.DB) *Server {
 	return &Server{db: db}
 }
