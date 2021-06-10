@@ -241,6 +241,36 @@ func (s *Server) ListBooksAvailable(w http.ResponseWriter, r *http.Request) {
 	s.writeResponse(w, http.StatusOK, body)
 }
 
+func (s *Server) CreateReview(w http.ResponseWriter, r *http.Request) {
+	id := chi.URLParam(r, "id")
+
+	body, err := s.readBody(r)
+	if err != nil {
+		http.Error(w, "Failed to read request body", http.StatusBadRequest)
+		return
+	}
+
+	review, err := models.NewReviewFromJSON(body)
+	if err != nil {
+		http.Error(w, "Failed to unmarshall request", http.StatusInternalServerError)
+		return
+	}
+
+	err = s.db.Model(&models.Review{}).Where("book_id = ?", id).Save(&review).Error
+	if err != nil {
+		http.Error(w, "Failed to create review to database", http.StatusInternalServerError)
+		return
+	}
+
+	payload, err := review.ToJSON()
+	if err != nil {
+		http.Error(w, "Failed to marshall response", http.StatusInternalServerError)
+		return
+	}
+
+	s.writeResponse(w, http.StatusCreated, payload)
+}
+
 func NewServer(db *gorm.DB) *Server {
 	return &Server{db: db}
 }
