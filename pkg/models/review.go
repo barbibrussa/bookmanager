@@ -1,6 +1,9 @@
 package models
 
-import "gorm.io/gorm"
+import (
+	"encoding/json"
+	"gorm.io/gorm"
+)
 
 type Review struct {
 	gorm.Model
@@ -9,4 +12,17 @@ type Review struct {
 
 	Book   Book `json:"-"`
 	BookID int  `json:"book_id"`
+}
+
+func (r Review) ToJSON() ([]byte, error) {
+	return json.Marshal(r)
+}
+
+func NewReviewFromJSON(b []byte) (Review, error) {
+	var review Review
+	err := json.Unmarshal(b, &review)
+	if err != nil {
+		return Review{}, err
+	}
+	return review, nil
 }
