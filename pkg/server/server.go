@@ -295,7 +295,20 @@ func (s *Server) ListBookReviews(w http.ResponseWriter, r *http.Request) {
 
 	var list []models.Review
 
-	err := s.db.Model(&models.Review{}).Where("book_id = ?", id).Find(&list).Error
+	var count int64
+
+	err := s.db.Model(&models.Book{}).Where("id = ?", id).Count(&count).Error
+	if err != nil {
+		http.Error(w, "Error while getting book", http.StatusInternalServerError)
+		return
+	}
+
+	if count == 0 {
+		http.Error(w, "Book not available", http.StatusNotFound)
+		return
+	}
+
+	err = s.db.Model(&models.Review{}).Where("book_id = ?", id).Find(&list).Error
 	if err != nil {
 		http.Error(w, "Failed to list checkouts from database", http.StatusInternalServerError)
 		return
