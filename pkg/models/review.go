@@ -18,11 +18,14 @@ func (r Review) ToJSON() ([]byte, error) {
 	return json.Marshal(r)
 }
 
-func NewReviewFromJSON(b []byte) (Review, error) {
+func NewReviewFromJSON(b []byte, id int) (Review, error) {
 	var review Review
 	err := json.Unmarshal(b, &review)
 	if err != nil {
 		return Review{}, err
 	}
+
+	review.BookID = id
+
 	return review, nil
 }

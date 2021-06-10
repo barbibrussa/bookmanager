@@ -250,13 +250,19 @@ func (s *Server) CreateReview(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	review, err := models.NewReviewFromJSON(body)
+	i, err := strconv.Atoi(id)
+	if err != nil {
+		http.Error(w, "Failed to type conversion", http.StatusInternalServerError)
+		return
+	}
+
+	review, err := models.NewReviewFromJSON(body, i)
 	if err != nil {
 		http.Error(w, "Failed to unmarshall request", http.StatusInternalServerError)
 		return
 	}
 
-	err = s.db.Model(&models.Review{}).Where("book_id = ?", id).Save(&review).Error
+	err = s.db.Model(&models.Review{}).Save(&review).Error
 	if err != nil {
 		http.Error(w, "Failed to create review to database", http.StatusInternalServerError)
 		return
