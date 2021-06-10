@@ -56,13 +56,13 @@ func (s *Server) CreateBook(w http.ResponseWriter, r *http.Request) {
 
 	book, err := models.NewBookFromJSON(body)
 	if err != nil {
-		http.Error(w, "Failed to unmarshall request", http.StatusInternalServerError)
+		http.Error(w, fmt.Sprintf("Failed to initialize book from json: %s", err), http.StatusBadRequest)
 		return
 	}
 
 	err = s.db.Model(&models.Book{}).Save(&book).Error
 	if err != nil {
-		http.Error(w, "Failed to create book to database", http.StatusInternalServerError)
+		http.Error(w, "Failed to create book into database", http.StatusInternalServerError)
 		return
 	}
 
@@ -147,13 +147,13 @@ func (s *Server) BorrowBook(w http.ResponseWriter, r *http.Request) {
 
 	checkout, err := models.NewCheckoutFromJSON(body)
 	if err != nil {
-		http.Error(w, "Failed to unmarshall request", http.StatusInternalServerError)
+		http.Error(w, fmt.Sprintf("Failed to initialize checkout from json: %s", err), http.StatusBadRequest)
 		return
 	}
 
 	i, err := strconv.Atoi(id)
 	if err != nil {
-		http.Error(w, "Failed to process request", http.StatusInternalServerError)
+		http.Error(w, "Failed to parse book id", http.StatusBadRequest)
 		return
 	}
 
@@ -163,7 +163,7 @@ func (s *Server) BorrowBook(w http.ResponseWriter, r *http.Request) {
 
 	err = s.db.Model(&models.Checkout{}).Save(&checkout).Error
 	if err != nil {
-		http.Error(w, "Failed to create checkout to database", http.StatusInternalServerError)
+		http.Error(w, "Failed to create checkout into database", http.StatusInternalServerError)
 		return
 	}
 
@@ -250,15 +250,28 @@ func (s *Server) CreateReview(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	i, err := strconv.Atoi(id)
+	var count int64
+
+	err = s.db.Model(&models.Book{}).Where("id = ?", id).Count(&count).Error
 	if err != nil {
-		http.Error(w, "Failed to type conversion", http.StatusInternalServerError)
+		http.Error(w, "Error while getting book", http.StatusInternalServerError)
 		return
 	}
 
-	review, err := models.NewReviewFromJSON(body, i)
+	if count == 0 {
+		http.Error(w, "Book not available", http.StatusNotFound)
+		return
+	}
+
+	i, err := strconv.Atoi(id)
 	if err != nil {
-		http.Error(w, "Failed to unmarshall request", http.StatusInternalServerError)
+		http.Error(w, "Failed to parse book id", http.StatusBadRequest)
+		return
+	}
+
+	review, err := models.NewReviewFromJSON(i, body)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Failed to initialize review from json: %s", err), http.StatusBadRequest)
 		return
 	}
 

@@ -2,6 +2,8 @@ package models
 
 import (
 	"encoding/json"
+	"errors"
+	"fmt"
 	"gorm.io/gorm"
 )
 
@@ -18,7 +20,17 @@ func (r Review) ToJSON() ([]byte, error) {
 	return json.Marshal(r)
 }
 
-func NewReviewFromJSON(b []byte, id int) (Review, error) {
+func (r Review) Validate() error {
+	if r.Score < 0 || r.Score > 10 {
+		return fmt.Errorf("invalid score: %d [1-10]", r.Score)
+	}
+	if len(r.Review) == 0 {
+		return errors.New("empty review")
+	}
+	return nil
+}
+
+func NewReviewFromJSON(id int, b []byte) (Review, error) {
 	var review Review
 	err := json.Unmarshal(b, &review)
 	if err != nil {
@@ -26,6 +38,10 @@ func NewReviewFromJSON(b []byte, id int) (Review, error) {
 	}
 
 	review.BookID = id
+
+	if err = review.Validate(); err != nil {
+		return Review{}, err
+	}
 
 	return review, nil
 }

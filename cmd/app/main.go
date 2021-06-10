@@ -16,7 +16,7 @@ func main() {
 		log.Fatal("Error while connecting to the database: ", err)
 	}
 
-	err = db.AutoMigrate(&models.Book{}, &models.Checkout{})
+	err = db.AutoMigrate(&models.Book{}, &models.Checkout{}, &models.Review{})
 	if err != nil {
 		log.Fatal("Error while auto-migrating models: ", err)
 	}
