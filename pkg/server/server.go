@@ -323,6 +323,26 @@ func (s *Server) ListBookReviews(w http.ResponseWriter, r *http.Request) {
 	s.writeResponse(w, http.StatusOK, body)
 }
 
+func (s *Server) DeleteReview(w http.ResponseWriter, r *http.Request) {
+	id := chi.URLParam(r, "id")
+
+	var review models.Review
+
+	err := s.db.Model(&models.Review{}).Where("id = ?", id).First(&review).Error
+	if err != nil {
+		http.Error(w, "Failed to get review from database", http.StatusNotFound)
+		return
+	}
+
+	err = s.db.Delete(&models.Review{}, id).Error
+	if err != nil {
+		http.Error(w, "Failed to delete review", http.StatusInternalServerError)
+		return
+	}
+
+	s.writeResponse(w, http.StatusOK, []byte(fmt.Sprintf("Review id %s has been deleted", id)))
+}
+
 func NewServer(db *gorm.DB) *Server {
 	return &Server{db: db}
 }
