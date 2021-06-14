@@ -2,6 +2,7 @@ import Vue from 'vue';
 import VueRouter, { RouteConfig } from 'vue-router';
 import Home from '../views/Home.vue';
 import BookList from '../views/BookList.vue';
+import Checkouts from '../views/Checkouts.vue';
 
 Vue.use(VueRouter);
 
@@ -10,6 +11,11 @@ const routes: Array<RouteConfig> = [
     path: '/',
     name: 'Home',
     component: Home,
+  },
+  {
+    path: '/checkouts',
+    name: 'Checkouts',
+    component: Checkouts,
   },
   {
     path: '/books',
