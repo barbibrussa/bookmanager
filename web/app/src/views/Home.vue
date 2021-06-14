@@ -1,16 +1,13 @@
 <template>
-  <hello-world />
+  <div>
+    <h1>Gestor de libros</h1>
+  </div>
 </template>
 
 <script lang="ts">
 import Vue from 'vue';
-import HelloWorld from '../components/HelloWorld.vue';
 
 export default Vue.extend({
   name: 'Home',
-
-  components: {
-    HelloWorld,
-  },
 });
 </script>
