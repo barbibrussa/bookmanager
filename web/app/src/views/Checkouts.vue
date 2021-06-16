@@ -55,6 +55,31 @@
         </tbody>
       </template>
     </v-simple-table>
+    <div>
+      <v-dialog
+        v-model="infoDialog"
+        transition="dialog-top-transition"
+        max-width="600"
+      >
+        <v-card>
+          <v-toolbar
+            color="primary"
+            dark
+          >Información</v-toolbar>
+          <v-card-title>{{ book.title }}</v-card-title>
+          <v-card-text>
+            <div class="my-1 text-subtitle-">Autor: {{ book.author }}</div>
+            <div>ID: {{ book.ID }}</div>
+          </v-card-text>
+          <v-card-actions class="justify-end">
+            <v-btn
+              text
+              @click="infoDialog = false"
+            >Close</v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
+    </div>
   </div>
 </template>
 
@@ -73,12 +98,17 @@ export default {
   data() {
     return {
       list: [],
+      book: {},
+      infoDialog: false,
     };
   },
   methods: {
     showInfo(id) {
       client.get(`/books/${id}`)
-        .then((res) => console.log(res.data));
+        .then((res) => {
+          this.book = res.data;
+          this.infoDialog = true;
+        });
     },
   },
 };
