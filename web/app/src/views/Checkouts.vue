@@ -26,7 +26,7 @@
             Fecha límite de devolución
           </th>
           <th class="text-left">
-            ID Libro
+            Acciones
           </th>
         </tr>
         </thead>
@@ -42,7 +42,7 @@
           <td>{{ item.phone_number }}</td>
           <td>{{ item.borrowed_at }}</td>
           <td>{{ item.deadline }}</td>
-          <td>{{ item.book_id }}
+          <td>
             <v-icon title="Informacion"
                     small
                     class="mr-2"
