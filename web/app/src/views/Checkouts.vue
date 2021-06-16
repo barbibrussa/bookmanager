@@ -42,7 +42,15 @@
           <td>{{ item.phone_number }}</td>
           <td>{{ item.borrowed_at }}</td>
           <td>{{ item.deadline }}</td>
-          <td>{{ item.book_id }}</td>
+          <td>{{ item.book_id }}
+            <v-icon title="Informacion"
+                    small
+                    class="mr-2"
+                    @click="showInfo(item.book_id)"
+            >
+              mdi-alert-circle-outline
+            </v-icon>
+          </td>
         </tr>
         </tbody>
       </template>
@@ -51,12 +59,14 @@
 </template>
 
 <script>
+import client from '@/api/client';
+
 export default {
   name: 'Checkouts',
   beforeCreate() {
-    fetch('http://localhost:3030/checkouts').then(
+    client.get('/checkouts').then(
       async (response) => {
-        this.list = await response.json();
+        this.list = response.data;
       },
     );
   },
@@ -64,6 +74,12 @@ export default {
     return {
       list: [],
     };
+  },
+  methods: {
+    showInfo(id) {
+      client.get(`/books/${id}`)
+        .then((res) => console.log(res.data));
+    },
   },
 };
 </script>
