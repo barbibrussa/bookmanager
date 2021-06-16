@@ -8,25 +8,25 @@
             ID
           </th>
           <th class="text-left">
-            First name
+            Nombre
           </th>
           <th class="text-left">
-            Last name
+            Apellido
           </th>
           <th class="text-left">
             DNI
           </th>
           <th class="text-left">
-            Phone number
+            Número de telefono
           </th>
           <th class="text-left">
-            Borrowed at
+            Préstamo
           </th>
           <th class="text-left">
-            Deadline
+            Fecha límite de devolución
           </th>
           <th class="text-left">
-            Book ID
+            ID Libro
           </th>
         </tr>
         </thead>
