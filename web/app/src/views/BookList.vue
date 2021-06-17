@@ -4,6 +4,7 @@
       v-model="filterAvailable"
       label="Filtrar disponibles"
       @click="listBooks"
+      color="success"
     ></v-switch>
     <v-simple-table>
       <template v-slot:default>
