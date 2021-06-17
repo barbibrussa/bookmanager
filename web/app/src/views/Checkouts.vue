@@ -50,6 +50,14 @@
             >
               mdi-alert-circle-outline
             </v-icon>
+            <v-icon
+              title="Devolver"
+              @click="selectBook(item.book_id); showReturnDialog();"
+              small
+              class="mr-2"
+            >
+              mdi-pencil
+            </v-icon>
           </td>
         </tr>
         </tbody>
@@ -79,6 +87,35 @@
           </v-card-actions>
         </v-card>
       </v-dialog>
+      <v-dialog
+        v-model="returnDialog"
+        persistent
+        max-width="400"
+      >
+        <v-card>
+          <v-card-title class="text-h5">
+            ¿Desea devolver el libro?
+          </v-card-title>
+          <v-card-text>Confirme para la devolución o aprete cancelar</v-card-text>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn
+              color="green darken-1"
+              text
+              @click="returnDialog = false"
+            >
+              Cancelar
+            </v-btn>
+            <v-btn
+              color="green darken-1"
+              text
+              @click="returnBook()"
+            >
+              Devolver
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
     </div>
   </div>
 </template>
@@ -100,6 +137,7 @@ export default {
       list: [],
       book: {},
       infoDialog: false,
+      returnDialog: false,
     };
   },
   methods: {
@@ -109,6 +147,22 @@ export default {
           this.book = res.data;
           this.infoDialog = true;
         });
+    },
+    selectBook(id) {
+      this.selected = id;
+    },
+    showReturnDialog() {
+      this.returnDialog = true;
+    },
+    returnBook() {
+      client.put(`/books/${this.selected}/return`)
+        .then((res) => console.log(res.data))
+        .catch((err) => console.error(err));
+
+      const i = this.list.findIndex((item) => item.ID === this.selected);
+      this.list.splice(i, 1);
+
+      this.returnDialog = false;
     },
   },
 };
