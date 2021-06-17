@@ -3,6 +3,7 @@ import VueRouter, { RouteConfig } from 'vue-router';
 import Home from '../views/Home.vue';
 import BookList from '../views/BookList.vue';
 import Checkouts from '../views/Checkouts.vue';
+import Book from '../views/Book.vue';
 
 Vue.use(VueRouter);
 
@@ -21,6 +22,11 @@ const routes: Array<RouteConfig> = [
     path: '/books',
     name: 'BookList',
     component: BookList,
+  },
+  {
+    path: '/books/:id',
+    name: 'Book',
+    component: Book,
   },
   {
     path: '/about',
