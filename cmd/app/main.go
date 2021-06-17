@@ -4,6 +4,7 @@ import (
 	"github.com/barbibrussa/bookmanager/pkg/models"
 	"github.com/barbibrussa/bookmanager/pkg/server"
 	"github.com/go-chi/chi"
+	"github.com/go-chi/cors"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	"log"
@@ -23,6 +24,17 @@ func main() {
 
 	r := chi.NewRouter()
 	s := server.NewServer(db)
+
+	r.Use(cors.Handler(cors.Options{
+		// AllowedOrigins:   []string{"https://foo.com"}, // Use this to allow specific origin hosts
+		AllowedOrigins: []string{"https://*", "http://*"},
+		// AllowOriginFunc:  func(r *http.Request, origin string) bool { return true },
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
+		ExposedHeaders:   []string{"Link"},
+		AllowCredentials: false,
+		MaxAge:           300, // Maximum value not ignored by any of major browsers
+	}))
 
 	r.Get("/books", s.ListBooks)
 	r.Post("/books", s.CreateBook)
