@@ -1,5 +1,10 @@
 <template>
   <div>
+    <v-switch
+      v-model="filterAvailable"
+      label="Filtrar disponibles"
+      @click="listBooks"
+    ></v-switch>
     <v-simple-table>
       <template v-slot:default>
         <thead>
@@ -180,6 +185,7 @@ export default {
       lastName: '',
       dni: '',
       phoneNumber: '',
+      filterAvailable: false,
     };
   },
   methods: {
@@ -210,6 +216,13 @@ export default {
     },
     showDeleteDialog() {
       this.removeDialog = true;
+    },
+    listBooks() {
+      client.get(`/books${this.filterAvailable ? '/available' : ''}`).then(
+        async (response) => {
+          this.list = response.data;
+        },
+      );
     },
   },
 };
