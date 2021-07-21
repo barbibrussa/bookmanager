@@ -4,11 +4,13 @@ import (
 	"github.com/barbibrussa/bookmanager/pkg/models"
 	"github.com/barbibrussa/bookmanager/pkg/server"
 	"github.com/go-chi/chi"
+	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/cors"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	"log"
 	"net/http"
+	"os"
 )
 
 func main() {
@@ -34,6 +36,13 @@ func main() {
 		ExposedHeaders:   []string{"Link"},
 		AllowCredentials: false,
 		MaxAge:           300, // Maximum value not ignored by any of major browsers
+	}))
+
+	user := os.Getenv("APP_USER")
+	password := os.Getenv("APP_PASSWORD")
+
+	r.Use(middleware.BasicAuth("librarians", map[string]string{
+		user: password,
 	}))
 
 	r.Get("/books", s.ListBooks)
