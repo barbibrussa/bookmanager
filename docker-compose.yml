@@ -1,0 +1,19 @@
+version: "3"
+services:
+  db:
+    image: mysql
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: 1234
+      MYSQL_DATABASE: bookmanager
+    volumes:
+      - ./tmp/data:/var/lib/mysql
+#  app:
+#    image: barbibrussa/bookmanager
+#    environment:
+#      APP_DB_USER: root
+#      APP_DB_PASSWORD: 1234
+#      APP_DB_HOST: db
+#      APP_DB_DATABASE: bookmanager
+#      APP_DB_PORT: 3306
