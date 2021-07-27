@@ -16,3 +16,7 @@
 
 # IDE
 .idea/
+
+# Application
+/tmp/
+/.env
