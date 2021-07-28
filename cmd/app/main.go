@@ -4,14 +4,14 @@ import (
 	"github.com/barbibrussa/bookmanager/pkg/models"
 	"github.com/barbibrussa/bookmanager/pkg/server"
 	"github.com/go-chi/chi"
-	"gorm.io/driver/sqlite"
+	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"log"
 	"net/http"
 )
 
 func main() {
-	db, err := gorm.Open(sqlite.Open("book_manager.db"), &gorm.Config{})
+	db, err := gorm.Open(mysql.Open(server.NewDSN()), &gorm.Config{})
 	if err != nil {
 		log.Fatal("Error while connecting to the database: ", err)
 	}
