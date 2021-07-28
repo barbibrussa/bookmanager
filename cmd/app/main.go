@@ -29,6 +29,11 @@ func main() {
 	user := os.Getenv("APP_USER")
 	password := os.Getenv("APP_PASSWORD")
 
+	if len(user) == 0 || len(password) == 0 {
+		log.Fatalf("Error: empty user and password credentials")
+		return
+	}
+
 	r.Use(middleware.BasicAuth("librarians", map[string]string{
 		user: password,
 	}))
