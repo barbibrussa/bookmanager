@@ -4,10 +4,12 @@ import (
 	"github.com/barbibrussa/bookmanager/pkg/models"
 	"github.com/barbibrussa/bookmanager/pkg/server"
 	"github.com/go-chi/chi"
+	"github.com/go-chi/chi/middleware"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"log"
 	"net/http"
+	"os"
 )
 
 func main() {
@@ -23,6 +25,13 @@ func main() {
 
 	r := chi.NewRouter()
 	s := server.NewServer(db)
+
+	user := os.Getenv("APP_USER")
+	password := os.Getenv("APP_PASSWORD")
+
+	r.Use(middleware.BasicAuth("librarians", map[string]string{
+		user: password,
+	}))
 
 	r.Get("/books", s.ListBooks)
 	r.Post("/books", s.CreateBook)
